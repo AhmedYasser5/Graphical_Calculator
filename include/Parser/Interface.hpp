@@ -8,7 +8,7 @@ namespace Calculator {
 
 template <typename T> class ParserInterface {
 public:
-  virtual static std::vector<NumberOperator>
+  virtual std::vector<NumberOperator>
   parse(const std::string &equation,
         const std::unordered_set<char> &variables) = 0;
 };
