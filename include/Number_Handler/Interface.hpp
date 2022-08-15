@@ -4,16 +4,17 @@
 
 namespace Calculator {
 
-template <typename T> class NumberHandlerInterface {
+template <typename N> class NumberHandlerInterface {
 public:
-  virtual static T fromString(const std::string &str) = 0;
-  virtual static std::string toString(const T &num) = 0;
-  virtual static T add(const T &first, const T &second) = 0;
-  virtual static T subtract(const T &first, const T &second) = 0;
-  virtual static T multiply(const T &first, const T &second) = 0;
-  virtual static T divide(const T &first, const T &second) = 0;
-  virtual static T power(const T &first, const T &second) = 0;
-  virtual static T modulo(const T &first, const T &second) = 0;
+  virtual ~NumberHandlerInterface() = default;
+  virtual N fromString(const std::string &str) const = 0;
+  virtual std::string toString(const N &num) const = 0;
+  virtual N add(const N &first, const N &second) const = 0;
+  virtual N subtract(const N &first, const N &second) const = 0;
+  virtual N multiply(const N &first, const N &second) const = 0;
+  virtual N divide(const N &first, const N &second) const = 0;
+  virtual N power(const N &first, const N &second) const = 0;
+  virtual N modulo(const N &first, const N &second) const = 0;
 };
 
 } // namespace Calculator
