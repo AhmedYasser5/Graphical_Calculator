@@ -23,7 +23,7 @@ Parser::Parser(std::unique_ptr<NumberHandlerInterface<double>> numberHandler)
   operatorDependecies["^"] = {};
 }
 
-void Parser::readOperator(const string &equation, size_t &index) {
+void Parser::readOperators(const string &equation, size_t &index) {
   string op;
   while (index < equation.size() &&
          operatorDependecies.find(op) == operatorDependecies.end() &&
@@ -62,8 +62,34 @@ void Parser::readSigns(const string &equation, size_t &index) {
   stacked.push(part);
 }
 
-void Parser::readNumber(const string &equation, size_t &index,
-                        const unordered_set<string> &variables) {
+void Parser::readNumbers(const string &equation, size_t &index) {
+  string num;
+  while (index < equation.size() &&
+         (isdigit(equation[index]) || equation[index] == '.'))
+    num += equation[index++];
+  --index;
+  UnionContainer part;
+  part.updateNumber(reader->fromString(num));
+  parsedEquation.emplace_back(part);
+}
+
+void Parser::readVariablesAndFunctions(const string &equation, size_t &index,
+                                       const unordered_set<string> &variables) {
+  string var;
+  while (index < equation.size() && isalpha(equation[index]))
+    var += equation[index++];
+  --index;
+  auto it = variables.find(var);
+  if (it == variables.end())
+    throw runtime_error("Variable " + var + " is not defined");
+  UnionContainer part;
+  part.updateFunction(var);
+  parsedEquation.emplace_back(part);
+}
+
+void Parser::readNumbersVariablesAndFunctions(
+    const string &equation, size_t &index,
+    const unordered_set<string> &variables) {
   readSigns(equation, index);
   ++index;
   if (index >= equation.size())
@@ -73,26 +99,10 @@ void Parser::readNumber(const string &equation, size_t &index,
     throw runtime_error(
         "Expected a number, a variable, or a function, but found: " +
         equation.substr(index, 1));
-  if (isalpha(equation[index])) {
-    string var;
-    while (index < equation.size() && isalpha(equation[index]))
-      var += equation[index++];
-    auto it = variables.find(var);
-    if (it == variables.end())
-      throw runtime_error("Variable " + var + " is not defined");
-    UnionContainer part;
-    part.updateFunction(var);
-    parsedEquation.emplace_back(part);
-  } else {
-    string num;
-    while (index < equation.size() &&
-           (isdigit(equation[index]) || equation[index] == '.'))
-      num += equation[index++];
-    UnionContainer part;
-    part.updateNumber(reader->fromString(num));
-    parsedEquation.emplace_back(part);
-  }
-  --index;
+  if (isalpha(equation[index]))
+    readVariablesAndFunctions(equation, index, variables);
+  else
+    readNumbers(equation, index);
 }
 
 void Parser::parse(const string &equation,
@@ -107,9 +117,9 @@ void Parser::parse(const string &equation,
       stacked.pop();
     }
     if (shouldBeOperator)
-      readOperator(equation, i);
+      readOperators(equation, i);
     else
-      readNumber(equation, i, variables);
+      readNumbersVariablesAndFunctions(equation, i, variables);
     shouldBeOperator = !shouldBeOperator;
   }
   if (!shouldBeOperator)
