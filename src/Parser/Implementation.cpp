@@ -90,8 +90,6 @@ void Parser::readVariablesAndFunctions(const string &equation, size_t &index,
 void Parser::readNumbersVariablesAndFunctions(
     const string &equation, size_t &index,
     const unordered_set<string> &variables) {
-  readSigns(equation, index);
-  ++index;
   if (index >= equation.size())
     throw runtime_error(
         "The equation should end with a number, a variable, or a function");
@@ -107,6 +105,7 @@ void Parser::readNumbersVariablesAndFunctions(
 
 void Parser::parse(const string &equation,
                    const unordered_set<string> &variables) {
+  parsedEquation.clear();
   bool shouldBeOperator = false;
   for (size_t i = 0; i < equation.size(); i++) {
     if (std::isblank(equation[i]))
@@ -116,10 +115,31 @@ void Parser::parse(const string &equation,
       parsedEquation.emplace_back(stacked.top());
       stacked.pop();
     }
-    if (shouldBeOperator)
+    if (shouldBeOperator) {
+      if (equation[i] == ')') {
+        while (!stacked.empty() && stacked.top().getOperator() != "(") {
+          parsedEquation.emplace_back(stacked.top());
+          stacked.pop();
+        }
+        if (stacked.empty())
+          throw runtime_error("A closing paranthesis doesn't have an opening");
+        stacked.pop();
+        continue;
+      }
       readOperators(equation, i);
-    else
+    } else {
+      readSigns(equation, i);
+      ++i;
+      if (i >= equation.size())
+        throw runtime_error("An equation shouldn't end with an operator");
+      if (equation[i] == '(') {
+        UnionContainer part;
+        part.updateOperator("(");
+        stacked.push(part);
+        continue;
+      }
       readNumbersVariablesAndFunctions(equation, i, variables);
+    }
     shouldBeOperator = !shouldBeOperator;
   }
   if (!shouldBeOperator)
