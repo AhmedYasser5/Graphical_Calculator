@@ -61,6 +61,8 @@ void Evaluator::processFunction(
 double
 Evaluator::evaluate(const std::vector<UnionContainer> &equation,
                     const std::unordered_map<string, double> &variables) {
+  while (!stackedNumbers.empty())
+    stackedNumbers.pop();
   for (size_t i = 0; i < equation.size(); i++) {
     if (equation[i].getState() == UnionContainer::NUMBER)
       stackedNumbers.push(equation[i].getNumber());
