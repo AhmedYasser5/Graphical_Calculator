@@ -18,7 +18,7 @@ private:
   container element;
 
 public:
-  enum STATE { NOTHING, NUMBER, OPERATOR, FUNCTION };
+  enum STATE { NUMBER, OPERATOR, FUNCTION, NOTHING };
 
 private:
   STATE state;
