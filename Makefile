@@ -7,7 +7,7 @@ OBJDIR := build/obj
 DEPDIR := build/deps
 BINDIR := .
 
-TARGET := $(BINDIR)/$(notdir $(subst $(space),_,$(realpath .)))_
+TARGET := $(BINDIR)/Graphical_Calculator_
 ifeq ($(RELEASE), 1)
 	TARGET := $(TARGET)Release
 else
@@ -45,13 +45,10 @@ else
 	CXXFLAGS += -D_GLIBCXX_ASSERTIONS
 endif
 
-CFLAGS += -MMD -MP -I$(SRCDIR) $(foreach i,$(MY_PATHS),-I$(i))
+CFLAGS += -MMD -MP $(foreach i,$(MY_PATHS),-I$(i))
 
 SRCS := $(wildcard $(SRCDIR)/*.cpp)
 SRCS += $(wildcard $(SRCDIR)/**/*.cpp)
-
-SRCS += $(wildcard $(SRCDIR)/*.c)
-SRCS += $(wildcard $(SRCDIR)/**/*.c)
 
 OBJS := $(patsubst $(SRCDIR)/%,$(OBJDIR)/%.$(maketype).o,$(SRCS))
 
@@ -72,14 +69,14 @@ run : $(TARGET)
 init :
 	-@rm -rf build $(wildcard *.exe)
 	@mkdir -p $(SRCDIR) $(INCDIR) $(OBJDIR) $(DEPDIR)
-	@for i in $(wildcard *.cpp) $(wildcard *.c) $(wildcard *.tpp); do mv ./$$i $(SRCDIR)/$$i; done
-	@for i in $(wildcard *.h) $(wildcard *.hpp); do mv ./$$i $(INCDIR)/$$i; done
+	@for i in $(wildcard *.cpp) $(wildcard *.c); do mv ./$$i $(SRCDIR)/$$i; done
+	@for i in $(wildcard *.hpp) $(wildcard *.h); do mv ./$$i $(INCDIR)/$$i; done
 	@TMP="";\
-		for i in $(MY_PATHS); do TMP=$${TMP}-I$$i\\n-I../$$i\\n; done;\
-		echo -e "$${TMP::-2}" >| $(SRCDIR)/.clang_complete
+		for i in $(MY_PATHS); do TMP="$${TMP}-I$$i\\n"; done;\
+		echo -e "$$TMP" >| .clang_complete
 
 $(TARGET) : $(OBJS)
-	-@echo LD $(maketype) "$(<D)/*.o" "->" $@ && \
+	-@echo LD $(maketype) "ALL ->" $@ && \
 		$(LD) -o $@ $(OBJS) $(LDFLAGS)
 
 $(OBJDIR)/%.cpp.$(maketype).o : $(SRCDIR)/%.cpp
@@ -87,12 +84,6 @@ $(OBJDIR)/%.cpp.$(maketype).o : $(SRCDIR)/%.cpp
 	@mkdir -p $(@D) $(dir $(CUR_DEP))
 	-@echo CXX $(maketype) $< "->" $@ && \
 		$(CXX) -c $< -o $@ -MF $(CUR_DEP) $(CXXFLAGS)
-
-$(OBJDIR)/%.c.$(maketype).o : $(SRCDIR)/%.c
-	@$(eval CUR_DEP := $(patsubst $(SRCDIR)/%,$(DEPDIR)/%.d,$<))
-	@mkdir -p $(@D) $(dir $(CUR_DEP))
-	-@echo CC $(maketype) $< "->" $@ && \
-		$(CC) -c $< -o $@ -MF $(CUR_DEP) $(CFLAGS)
 
 DEPS := $(patsubst $(SRCDIR)/%,$(DEPDIR)/%.d,$(SRCS))
 
