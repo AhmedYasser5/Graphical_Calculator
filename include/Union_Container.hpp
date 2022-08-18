@@ -30,10 +30,10 @@ public:
   ~UnionContainer();
   UnionContainer(const UnionContainer &other);
   UnionContainer &operator=(const UnionContainer &other);
-  constexpr const STATE &getState() const;
-  constexpr const N &getNumber() const;   // throws std::logic_error
-  constexpr const O &getOperator() const; // throws std::logic_error
-  constexpr const F &getFunction() const; // throws std::logic_error
+  const STATE &getState() const;
+  const N &getNumber() const;   // throws std::logic_error
+  const O &getOperator() const; // throws std::logic_error
+  const F &getFunction() const; // throws std::logic_error
   void updateNumber(const N &num);
   void updateOperator(const O &op);
   void updateFunction(const F &func);
@@ -93,20 +93,20 @@ Calculator::UnionContainer<N, O, F>::operator=(const UnionContainer &other) {
 }
 
 template <typename N, typename O, typename F>
-constexpr const typename Calculator::UnionContainer<N, O, F>::STATE &
+const typename Calculator::UnionContainer<N, O, F>::STATE &
 Calculator::UnionContainer<N, O, F>::getState() const {
   return state;
 }
 
 template <typename N, typename O, typename F>
-constexpr const N &Calculator::UnionContainer<N, O, F>::getNumber() const {
+const N &Calculator::UnionContainer<N, O, F>::getNumber() const {
   if (state != NUMBER)
     throw std::logic_error("It is not currently a number... you cannot get it");
   return element.num;
 }
 
 template <typename N, typename O, typename F>
-constexpr const O &Calculator::UnionContainer<N, O, F>::getOperator() const {
+const O &Calculator::UnionContainer<N, O, F>::getOperator() const {
   if (state != OPERATOR)
     throw std::logic_error(
         "It is not currently an operator... you cannot get it");
@@ -114,7 +114,7 @@ constexpr const O &Calculator::UnionContainer<N, O, F>::getOperator() const {
 }
 
 template <typename N, typename O, typename F>
-constexpr const F &Calculator::UnionContainer<N, O, F>::getFunction() const {
+const F &Calculator::UnionContainer<N, O, F>::getFunction() const {
   if (state != FUNCTION)
     throw std::logic_error(
         "It is not currently a function... you cannot get it");
