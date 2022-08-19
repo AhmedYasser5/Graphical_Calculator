@@ -85,3 +85,12 @@ NumberHandler::NumberType
 NumberHandler::negate(const NumberType &number) const {
   return -number;
 }
+
+NumberHandler::NumberType NumberHandler::log(const NumberType &first,
+                                             const NumberType &second) const {
+  NumberType result = std::log(first) / std::log(second);
+  if (isnan(result))
+    throw runtime_error("Log error: log(" + toString(first) + ", " +
+                        toString(second) + ")");
+  return result;
+}

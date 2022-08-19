@@ -16,6 +16,7 @@ public:
   virtual N power(const N &first, const N &second) const = 0;
   virtual N modulo(const N &first, const N &second) const = 0;
   virtual N negate(const N &number) const = 0;
+  virtual N log(const N &first, const N &second) const = 0;
 };
 
 } // namespace Calculator
