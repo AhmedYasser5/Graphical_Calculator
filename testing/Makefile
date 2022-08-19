@@ -77,7 +77,8 @@ run : $(TARGET)
 .PHONY: init
 init :
 	-@rm -rf build $(wildcard *.exe)
-	@mkdir -p $(SRCDIR) $(INCDIR) $(OBJDIR) $(DEPDIR) $(BINDIR2)/$(OBJDIR) $(BINDIR2)/$(DEPDIR)
+	@mkdir -p $(SRCDIR) $(INCDIR) $(OBJDIR) $(DEPDIR)
+	@mkdir -p $(BINDIR2)/$(SRCDIR) $(BINDIR2)/$(INCDIR) $(BINDIR2)/$(OBJDIR) $(BINDIR2)/$(DEPDIR)
 	@for i in $(wildcard *.cpp) $(wildcard *.c); do mv ./$$i $(SRCDIR)/$$i; done
 	@for i in $(wildcard *.hpp) $(wildcard *.h); do mv ./$$i $(INCDIR)/$$i; done
 	@TMP="";\
