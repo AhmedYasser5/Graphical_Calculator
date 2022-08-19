@@ -6,70 +6,66 @@ using namespace Calculator;
 using std::runtime_error;
 using std::size_t;
 using std::string;
+using std::unordered_map;
 
 Evaluator::Evaluator(
-    std::unique_ptr<NumberHandlerInterface<double>> operationsHandler)
+    std::unique_ptr<NumberHandlerInterface<NumberType>> operationsHandler)
     : operationsHandler(std::move(operationsHandler)) {}
 
-void Evaluator::processOperator(const string &op) {
+void Evaluator::processFunctions(const FunctionType &func) {
   if (stackedNumbers.empty())
-    throw runtime_error("No numbers found for the operator " + op);
-  double second = stackedNumbers.top();
+    throw runtime_error("No numbers found for the function " + func);
+  NumberType number = stackedNumbers.top();
   stackedNumbers.pop();
-  if (stackedNumbers.empty())
-    throw runtime_error("Only one number found for the operator " + op);
-  double first = stackedNumbers.top();
-  stackedNumbers.pop();
-  double answer;
-  if (op == "+")
-    answer = operationsHandler->add(first, second);
-  else if (op == "-")
-    answer = operationsHandler->subtract(first, second);
-  else if (op == "*")
-    answer = operationsHandler->multiply(first, second);
-  else if (op == "/")
-    answer = operationsHandler->divide(first, second);
-  else if (op == "%")
-    answer = operationsHandler->modulo(first, second);
-  else if (op == "^")
-    answer = operationsHandler->power(first, second);
-  else
-    throw runtime_error("Unknown operator " + op);
+  NumberType answer;
+  if (func == "neg")
+    answer = operationsHandler->negate(number);
+  else {
+    if (stackedNumbers.empty())
+      throw runtime_error("Only one number found for the function " + func);
+    auto &second = number;
+    NumberType first = stackedNumbers.top();
+    stackedNumbers.pop();
+    if (func == "+")
+      answer = operationsHandler->add(first, second);
+    else if (func == "-")
+      answer = operationsHandler->subtract(first, second);
+    else if (func == "*")
+      answer = operationsHandler->multiply(first, second);
+    else if (func == "/")
+      answer = operationsHandler->divide(first, second);
+    else if (func == "%")
+      answer = operationsHandler->modulo(first, second);
+    else if (func == "^")
+      answer = operationsHandler->power(first, second);
+    else
+      throw runtime_error("Unknown function " + func);
+  }
   stackedNumbers.push(answer);
 }
 
-void Evaluator::processFunction(
-    const string &func, const std::unordered_map<string, double> &variables) {
-  auto it = variables.find(func);
-  if (it != variables.end()) {
+void Evaluator::processVariables(
+    const VariableType &var,
+    const unordered_map<string, NumberType> &variables) {
+  auto it = variables.find(var);
+  if (it != variables.end())
     stackedNumbers.push(it->second);
-    return;
-  }
-  if (stackedNumbers.empty())
-    throw runtime_error("No number provided for the function " + func);
-  double num = stackedNumbers.top();
-  stackedNumbers.pop();
-  if (func == "+")
-    ;
-  else if (func == "-")
-    num *= -1;
   else
-    throw runtime_error("Unknown function " + func);
-  stackedNumbers.push(num);
+    throw runtime_error("No variable " + var + " is defined");
 }
 
-double
-Evaluator::evaluate(const std::vector<UnionContainer> &equation,
-                    const std::unordered_map<string, double> &variables) {
+Evaluator::NumberType
+Evaluator::evaluate(const std::vector<EquationElement> &equation,
+                    const unordered_map<string, NumberType> &variables) {
   while (!stackedNumbers.empty())
     stackedNumbers.pop();
   for (size_t i = 0; i < equation.size(); i++) {
-    if (equation[i].getState() == UnionContainer::NUMBER)
+    if (equation[i].getState() == EquationElement::NUMBER)
       stackedNumbers.push(equation[i].getNumber());
-    else if (equation[i].getState() == UnionContainer::OPERATOR)
-      processOperator(equation[i].getOperator());
-    else if (equation[i].getState() == UnionContainer::FUNCTION)
-      processFunction(equation[i].getFunction(), variables);
+    else if (equation[i].getState() == EquationElement::FUNCTION)
+      processFunctions(equation[i].getFunction());
+    else if (equation[i].getState() == EquationElement::VARIABLE)
+      processVariables(equation[i].getVariable(), variables);
     else
       throw runtime_error("Unknown part of the equation");
   }

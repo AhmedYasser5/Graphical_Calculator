@@ -7,22 +7,28 @@ namespace Calculator {
 
 class Evaluator : public EvaluatorInterface<double, std::string, std::string> {
 private:
-  using UnionContainer = UnionContainer<double, std::string, std::string>;
+  using NumberType = double;
+  using VariableType = std::string;
+  using FunctionType = std::string;
+  using EquationElement =
+      EquationElement<NumberType, VariableType, FunctionType>;
 
-  std::unique_ptr<NumberHandlerInterface<double>> operationsHandler;
-  std::stack<double> stackedNumbers;
+  std::unique_ptr<NumberHandlerInterface<NumberType>> operationsHandler;
+  std::stack<NumberType> stackedNumbers;
 
-  void processOperator(const std::string &op);
-  void
-  processFunction(const std::string &func,
-                  const std::unordered_map<std::string, double> &variables);
+  void processFunctions(const FunctionType &func);
+  void processVariables(
+      const VariableType &var,
+      const std::unordered_map<std::string, NumberType> &variables);
 
 public:
-  Evaluator(std::unique_ptr<NumberHandlerInterface<double>> operationsHandler);
+  Evaluator(
+      std::unique_ptr<NumberHandlerInterface<NumberType>> operationsHandler);
   virtual ~Evaluator() = default;
-  virtual double evaluate(const std::vector<UnionContainer> &equation,
-                          const std::unordered_map<std::string, double>
-                              &variables = {}); // throws different exceptions
+  virtual NumberType
+  evaluate(const std::vector<EquationElement> &equation,
+           const std::unordered_map<std::string, NumberType> &variables =
+               {}); // throws different exceptions
 };
 
 } // namespace Calculator
