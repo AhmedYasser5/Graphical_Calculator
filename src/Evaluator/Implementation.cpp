@@ -38,6 +38,8 @@ void Evaluator::processFunctions(const FunctionType &func) {
       answer = operationsHandler->modulo(first, second);
     else if (func == "^")
       answer = operationsHandler->power(first, second);
+    else if (func == "log")
+      answer = operationsHandler->log(first, second);
     else
       throw runtime_error("Unknown function " + func);
   }
