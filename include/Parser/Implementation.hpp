@@ -18,22 +18,19 @@ private:
   std::unique_ptr<NumberHandlerInterface<NumberType>> reader;
   std::unordered_map<FunctionType, std::unordered_set<FunctionType>>
       operatorDependecies;
-  std::unordered_set<std::string> functions;
+  std::unordered_set<FunctionType> functions;
   std::vector<EquationElement> parsedEquation;
   std::stack<FunctionType> stackedFunctions;
 
   template <typename Function>
-  void pushStackedFunctionsUntil(Function condition);
+  void popStackedFunctionsUntil(Function stopCondition);
+
   void readWhitespaces(const std::string &equation, std::size_t &index) const;
+
   void readOperators(const std::string &equation, std::size_t &index);
   void readSigns(const std::string &equation, std::size_t &index);
   void readNumbers(const std::string &equation, std::size_t &index);
-  void
-  readVariablesAndFunctions(const std::string &equation, std::size_t &index,
-                            const std::unordered_set<std::string> &variables);
-  void readNumbersVariablesAndFunctions(
-      const std::string &equation, std::size_t &index,
-      const std::unordered_set<std::string> &variables);
+  std::string readLetters(const std::string &equation, std::size_t &index);
 
 public:
   Parser(std::unique_ptr<NumberHandlerInterface<NumberType>> numberHandler);

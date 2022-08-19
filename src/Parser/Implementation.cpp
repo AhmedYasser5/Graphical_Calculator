@@ -23,6 +23,7 @@ Parser::Parser(
   operatorDependecies["%"] = {"*", "/", "%", "^"};
   operatorDependecies["^"] = {};
   functions.insert("neg");
+  functions.insert("log");
 }
 
 void Parser::readWhitespaces(const string &equation, size_t &index) const {
@@ -74,42 +75,16 @@ void Parser::readNumbers(const string &equation, size_t &index) {
   parsedEquation.back().updateNumber(reader->fromString(num));
 }
 
-void Parser::readVariablesAndFunctions(const string &equation, size_t &index,
-                                       const unordered_set<string> &variables) {
-  parsedEquation.emplace_back();
-  string temp;
+string Parser::readLetters(const string &equation, size_t &index) {
+  string word;
   while (index < equation.size() && isalpha(equation[index]))
-    temp += equation[index++];
-  if (functions.find(temp) != functions.end()) {
-    parsedEquation.back().updateFunction(temp);
-    return;
-  }
-  auto &var = temp;
-  auto it = variables.find(var);
-  if (it == variables.end()) {
-    parsedEquation.pop_back();
-    throw runtime_error("Variable/Function " + var + " is not defined");
-  }
-  parsedEquation.back().updateVariable(var);
-}
-
-void Parser::readNumbersVariablesAndFunctions(
-    const string &equation, size_t &index,
-    const unordered_set<string> &variables) {
-  if (!isalnum(equation[index]))
-    throw runtime_error(
-        "Expected a number, a variable, or a function, but found: " +
-        equation.substr(index, 1));
-  if (isalpha(equation[index]))
-    readVariablesAndFunctions(equation, index, variables);
-  else
-    readNumbers(equation, index);
+    word += equation[index++];
+  return word;
 }
 
 template <typename Function>
-void Parser::pushStackedFunctionsUntil(Function condition) {
-  while (!stackedFunctions.empty() &&
-         condition(stackedFunctions.top()) == true) {
+void Parser::popStackedFunctionsUntil(Function stopCondition) {
+  while (!stackedFunctions.empty() && !stopCondition(stackedFunctions.top())) {
     parsedEquation.emplace_back();
     parsedEquation.back().updateFunction(stackedFunctions.top());
     stackedFunctions.pop();
@@ -121,22 +96,27 @@ void Parser::parse(const string &equation,
   parsedEquation.clear();
   bool shouldBeOperator = false;
   for (size_t i = 0; i < equation.size();) {
-    pushStackedFunctionsUntil([&](const FunctionType &func) -> bool {
-      return functions.find(func) != functions.end();
-    });
     readWhitespaces(equation, i);
     if (i == equation.size())
       break;
     if (shouldBeOperator) {
+      if (equation[i] == ',') {
+        shouldBeOperator = false;
+        i++;
+        continue;
+      }
       if (equation[i] == ')') {
-        pushStackedFunctionsUntil(
-            [](const FunctionType &func) -> bool { return func != "("; });
+        popStackedFunctionsUntil(
+            [](const FunctionType &func) -> bool { return func == "("; });
         if (stackedFunctions.empty())
           throw runtime_error("A closing paranthesis doesn't have an opening");
         stackedFunctions.pop();
         i++;
         continue;
       }
+      popStackedFunctionsUntil([&](const FunctionType &func) -> bool {
+        return functions.find(func) == functions.end();
+      });
       readOperators(equation, i);
     } else {
       readSigns(equation, i);
@@ -147,15 +127,30 @@ void Parser::parse(const string &equation,
         i++;
         continue;
       }
-      readNumbersVariablesAndFunctions(equation, i, variables);
+      if (isalpha(equation[i])) {
+        string word = readLetters(equation, i);
+        if (functions.find(word) != functions.end()) {
+          stackedFunctions.emplace(word);
+          continue;
+        } else if (variables.find(word) != variables.end()) {
+          parsedEquation.emplace_back();
+          parsedEquation.back().updateVariable(word);
+        } else
+          throw runtime_error("Unknown variable/function " + word);
+      } else if (isdigit(equation[i]))
+        readNumbers(equation, i);
+      else
+        throw runtime_error(
+            "Expected a number, a variable, or a function, but found: " +
+            equation.substr(i));
     }
     shouldBeOperator = !shouldBeOperator;
   }
   if (!shouldBeOperator)
     throw runtime_error(
         "The equation should end with a number, a variable, or a function");
-  pushStackedFunctionsUntil(
-      [](const FunctionType &func) -> bool { return func != "("; });
+  popStackedFunctionsUntil(
+      [](const FunctionType &func) -> bool { return func == "("; });
   if (!stackedFunctions.empty())
     throw runtime_error("An opening paranthesis doesn't have a closing");
 }
