@@ -18,28 +18,28 @@ public:
   fromString(const std::string &str) const; // throws std::runtime_error
   virtual std::string toString(const NumberType &num) const;
   virtual NumberType
-  add(const NumberType &first,
-      const NumberType &second) const; // throws std::runtime_error
+  add(const NumberType &augend,
+      const NumberType &addend) const; // throws std::runtime_error
   virtual NumberType
-  subtract(const NumberType &first,
-           const NumberType &second) const; // throws std::runtime_error
+  subtract(const NumberType &minuend,
+           const NumberType &subtrahend) const; // throws std::runtime_error
   virtual NumberType
-  multiply(const NumberType &first,
-           const NumberType &second) const; // throws std::runtime_error
+  multiply(const NumberType &multiplicand,
+           const NumberType &multiplier) const; // throws std::runtime_error
   virtual NumberType
-  divide(const NumberType &first,
-         const NumberType &second) const; // throws std::runtime_error
+  divide(const NumberType &dividend,
+         const NumberType &divisor) const; // throws std::runtime_error
   virtual NumberType
-  power(const NumberType &first,
-        const NumberType &second) const; // throws std::runtime_error
+  power(const NumberType &base,
+        const NumberType &exponent) const; // throws std::runtime_error
   virtual NumberType
-  modulo(const NumberType &first,
-         const NumberType &second) const; // throws std::runtime_error
+  modulo(const NumberType &dividend,
+         const NumberType &divisor) const; // throws std::runtime_error
   virtual NumberType
   negate(const NumberType &number) const; // throws std::runtime_error
   virtual NumberType
-  log(const NumberType &first,
-      const NumberType &second) const; // throws std::runtime_error
+  log(const NumberType &power,
+      const NumberType &base) const; // throws std::runtime_error
 };
 
 } // namespace Calculator

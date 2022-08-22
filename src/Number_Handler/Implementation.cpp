@@ -8,8 +8,10 @@
 #include <stdexcept>
 
 using namespace Calculator;
+using std::abs;
 using std::isdigit;
 using std::isnan;
+using std::numeric_limits;
 using std::pow;
 using std::runtime_error;
 using std::size_t;
@@ -44,85 +46,84 @@ NumberHandler::NumberType NumberHandler::fromString(const string &str) const {
 
 string NumberHandler::toString(const NumberType &num) const {
   std::stringstream writer;
-  writer << std::fixed
-         << std::setprecision(std::numeric_limits<double>::digits10) << num;
+  writer << std::fixed << std::setprecision(numeric_limits<double>::digits10)
+         << num;
   return writer.str();
 }
 
-NumberHandler::NumberType NumberHandler::add(const NumberType &first,
-                                             const NumberType &second) const {
-  if (isNAN(first, second))
-    throw runtime_error("NAN error: add(" + toString(first) + ", " +
-                        toString(second) + ")");
-  return first + second;
+NumberHandler::NumberType NumberHandler::add(const NumberType &augend,
+                                             const NumberType &addend) const {
+  if (isNAN(augend, addend))
+    throw runtime_error("NAN error: add(" + toString(augend) + ", " +
+                        toString(addend) + ")");
+  return augend + addend;
 }
 
 NumberHandler::NumberType
-NumberHandler::subtract(const NumberType &first,
-                        const NumberType &second) const {
-  if (isNAN(first, second))
-    throw runtime_error("NAN error: subtract(" + toString(first) + ", " +
-                        toString(second) + ")");
-  return first - second;
+NumberHandler::subtract(const NumberType &minuend,
+                        const NumberType &subtrahend) const {
+  if (isNAN(minuend, subtrahend))
+    throw runtime_error("NAN error: subtract(" + toString(minuend) + ", " +
+                        toString(subtrahend) + ")");
+  return minuend - subtrahend;
 }
 
 NumberHandler::NumberType
-NumberHandler::multiply(const NumberType &first,
-                        const NumberType &second) const {
-  if (isNAN(first, second))
-    throw runtime_error("NAN error: multiply(" + toString(first) + ", " +
-                        toString(second) + ")");
-  return first * second;
+NumberHandler::multiply(const NumberType &multiplicand,
+                        const NumberType &multiplier) const {
+  if (isNAN(multiplicand, multiplier))
+    throw runtime_error("NAN error: multiply(" + toString(multiplicand) + ", " +
+                        toString(multiplier) + ")");
+  return multiplicand * multiplier;
 }
 
 NumberHandler::NumberType
-NumberHandler::divide(const NumberType &first, const NumberType &second) const {
-  if (isNAN(first, second))
-    throw runtime_error("NAN error: divide(" + toString(first) + ", " +
-                        toString(second) + ")");
-  NumberType result = first / second;
+NumberHandler::divide(const NumberType &dividend,
+                      const NumberType &divisor) const {
+  if (isNAN(dividend, divisor))
+    throw runtime_error("NAN error: divide(" + toString(dividend) + ", " +
+                        toString(divisor) + ")");
+  NumberType result = dividend / divisor;
   if (std::isinf(result))
-    throw runtime_error("Divide by zero error: divide(" + toString(first) +
-                        ", " + toString(second) + ")");
+    throw runtime_error("Divide by zero error: divide(" + toString(dividend) +
+                        ", " + toString(divisor) + ")");
   return result;
 }
 
-NumberHandler::NumberType NumberHandler::power(const NumberType &first,
-                                               const NumberType &second) const {
-  if (isNAN(first, second))
-    throw runtime_error("NAN error: power(" + toString(first) + ", " +
-                        toString(second) + ")");
-  NumberType Base = first, Power = second;
-  if (Power < 0) {
-    Base = 1 / Base;
-    Power = -Power;
+template <typename T> static T fastExponentiation(T base, size_t exponent) {
+  T power = 1;
+  while (exponent) {
+    if (exponent & 1)
+      power *= base;
+    base *= base;
+    exponent >>= 1;
   }
-  NumberType Result;
-  if (Base >= 0)
-    Result = pow(Base, Power);
-  else {
-    Result = pow(-Base, Power);
-    if (pow(-Result, 1 / Power) == Base)
-      Result = -Result;
-    else if (Result != pow(Result, 1 / Power))
-      Result = pow(Base, Power);
-  }
-  if (isNAN(Result))
-    throw runtime_error("Fractional power of negative numbers error: power(" +
-                        toString(first) + ", " + toString(second) + ")");
-  return Result;
+  return power;
 }
 
 NumberHandler::NumberType
-NumberHandler::modulo(const NumberType &first, const NumberType &second) const {
-  if (isNAN(first, second))
-    throw runtime_error("NAN error: modulo(" + toString(first) + ", " +
-                        toString(second) + ")");
-  NumberType result = std::fmod(first, second);
-  if (isnan(result))
-    throw runtime_error("Modulus to zero error: modulo(" + toString(first) +
-                        ", " + toString(second) + ")");
-  return result;
+NumberHandler::power(const NumberType &base, const NumberType &exponent) const {
+  if (isNAN(base, exponent))
+    throw runtime_error("NAN error: power(" + toString(base) + ", " +
+                        toString(exponent) + ")");
+  NumberType Power = pow(base, exponent);
+  if (isNAN(Power))
+    throw runtime_error("Fractional power of negative numbers error: power(" +
+                        toString(base) + ", " + toString(exponent) + ")");
+  return Power;
+}
+
+NumberHandler::NumberType
+NumberHandler::modulo(const NumberType &dividend,
+                      const NumberType &divisor) const {
+  if (isNAN(dividend, divisor))
+    throw runtime_error("NAN error: modulo(" + toString(dividend) + ", " +
+                        toString(divisor) + ")");
+  NumberType remainder = std::fmod(dividend, divisor);
+  if (isNAN(remainder))
+    throw runtime_error("Modulus to zero error: modulo(" + toString(dividend) +
+                        ", " + toString(divisor) + ")");
+  return remainder;
 }
 
 NumberHandler::NumberType
@@ -132,14 +133,14 @@ NumberHandler::negate(const NumberType &number) const {
   return -number;
 }
 
-NumberHandler::NumberType NumberHandler::log(const NumberType &first,
-                                             const NumberType &second) const {
-  if (isNAN(first, second))
-    throw runtime_error("NAN error: log(" + toString(first) + ", " +
-                        toString(second) + ")");
-  NumberType result = std::log(first) / std::log(second);
-  if (isnan(result))
-    throw runtime_error("Log error: log(" + toString(first) + ", " +
-                        toString(second) + ")");
-  return result;
+NumberHandler::NumberType NumberHandler::log(const NumberType &power,
+                                             const NumberType &base) const {
+  if (isNAN(power, base))
+    throw runtime_error("NAN error: log(" + toString(power) + ", " +
+                        toString(base) + ")");
+  NumberType Logarithm = std::log(power) / std::log(base);
+  if (isNAN(Logarithm))
+    throw runtime_error("Log error: log(" + toString(power) + ", " +
+                        toString(base) + ")");
+  return Logarithm;
 }
