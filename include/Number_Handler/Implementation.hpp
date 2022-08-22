@@ -11,6 +11,7 @@ protected:
   bool isNAN() const;
   template <typename... Args>
   bool isNAN(const NumberType &number, const Args &...restOfNumbers) const;
+  bool isEqual(const NumberType &first, const NumberType &second) const;
 
 public:
   virtual ~NumberHandler() = default;
@@ -29,6 +30,13 @@ public:
   virtual NumberType
   divide(const NumberType &dividend,
          const NumberType &divisor) const; // throws std::runtime_error
+protected:
+  NumberType integerPower(const NumberType &base,
+                          const NumberType &exponent) const;
+  NumberType fractionPower(const NumberType &base,
+                           const NumberType &exponent) const;
+
+public:
   virtual NumberType
   power(const NumberType &base,
         const NumberType &exponent) const; // throws std::runtime_error
