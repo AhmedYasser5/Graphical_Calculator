@@ -27,8 +27,9 @@ public:
   modulo(const NumberType &first,
          const NumberType &second) const; // throws std::runtime_error
   virtual NumberType negate(const NumberType &number) const;
-  virtual NumberType log(const NumberType &first,
-                         const NumberType &second) const;
+  virtual NumberType
+  log(const NumberType &first,
+      const NumberType &second) const; // throws std::runtime_error
 };
 
 } // namespace Calculator

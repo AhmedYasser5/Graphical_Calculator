@@ -2,6 +2,8 @@
 #include <cctype>
 #include <cmath>
 #include <cstddef>
+#include <iomanip>
+#include <limits>
 #include <sstream>
 #include <stdexcept>
 
@@ -33,7 +35,8 @@ NumberHandler::NumberType NumberHandler::fromString(const string &str) const {
 
 string NumberHandler::toString(const NumberType &num) const {
   std::stringstream writer;
-  writer << num;
+  writer << std::fixed
+         << std::setprecision(std::numeric_limits<double>::digits10) << num;
   return writer.str();
 }
 
