@@ -30,13 +30,6 @@ public:
   virtual NumberType
   divide(const NumberType &dividend,
          const NumberType &divisor) const; // throws std::runtime_error
-protected:
-  NumberType integerPower(const NumberType &base,
-                          const NumberType &exponent) const;
-  NumberType fractionPower(const NumberType &base,
-                           const NumberType &exponent) const;
-
-public:
   virtual NumberType
   power(const NumberType &base,
         const NumberType &exponent) const; // throws std::runtime_error

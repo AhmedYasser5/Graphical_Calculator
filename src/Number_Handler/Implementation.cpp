@@ -14,11 +14,12 @@ using std::isinf;
 using std::isnan;
 using std::numeric_limits;
 using std::pow;
+using std::round;
 using std::runtime_error;
 using std::size_t;
 using std::string;
 
-#define EPSILON 1e-6
+#define EPSILON numeric_limits<NumberType>::epsilon()
 
 bool NumberHandler::isNAN() const { return false; }
 
@@ -101,46 +102,17 @@ NumberHandler::divide(const NumberType &dividend,
 }
 
 NumberHandler::NumberType
-NumberHandler::integerPower(const NumberType &base,
-                            const NumberType &exponent) const {
-  return pow(base, (size_t)exponent);
-}
-
-NumberHandler::NumberType
-NumberHandler::fractionPower(const NumberType &base,
-                             const NumberType &exponent) const {
-  NumberType Exponent = exponent - (size_t)exponent;
-  NumberType power = pow(abs(base), Exponent);
-  if (isEqual(Exponent, 0) || base > 0 || isEqual(base, 0))
-    return power;
-  return -power;
-}
-
-NumberHandler::NumberType
 NumberHandler::power(const NumberType &base, const NumberType &exponent) const {
   if (isNAN(base, exponent))
     throw runtime_error("NAN error: power(" + toString(base) + ", " +
                         toString(exponent) + ")");
-  if (isEqual(exponent, 0))
-    return 1;
-  NumberType Power = pow(base, exponent);
-  if (isNAN(Power) && base < 0) {
-    NumberType Base = base, Exponent = exponent;
-    if (exponent < 0) {
-      Base = 1 / Base;
-      Exponent = -Exponent;
-    }
-    NumberType IntegerPower = integerPower(Base, Exponent);
-    NumberType FractionPower = fractionPower(Base, Exponent);
-    NumberType InverseIntegerBase = integerPower(FractionPower, 1 / Exponent);
-    NumberType InverseFractionBase = fractionPower(FractionPower, 1 / Exponent);
-    if (InverseIntegerBase * InverseFractionBase < 0)
-      Power = IntegerPower * FractionPower;
-  }
-  if (isNAN(Power))
+  NumberType power = pow(base, exponent);
+  if (isNAN(power) && isEqual(round(exponent), exponent))
+    power = pow(base, round(exponent));
+  if (isNAN(power))
     throw runtime_error("Fractional power of negative numbers error: power(" +
                         toString(base) + ", " + toString(exponent) + ")");
-  return Power;
+  return power;
 }
 
 NumberHandler::NumberType
@@ -168,19 +140,24 @@ NumberHandler::NumberType NumberHandler::log(const NumberType &power,
   if (isNAN(power, base))
     throw runtime_error("NAN error: log(" + toString(power) + ", " +
                         toString(base) + ")");
-  NumberType Logarithm = std::log(power) / std::log(base);
-  if (isNAN(Logarithm) && base < 0) {
-    NumberType positiveLog = std::log(abs(power)) / std::log(abs(base));
+  NumberType logarithm = std::log(power) / std::log(base);
+  if (isNAN(logarithm) && base < 0) {
+    NumberType absLog = std::log(abs(power)) / std::log(abs(base));
     try {
-      if (isEqual(NumberHandler::power(base, positiveLog), power))
-        Logarithm = positiveLog;
-      else if (isEqual(NumberHandler::power(base, -positiveLog), power))
-        Logarithm = -positiveLog;
-    } catch (const std::exception &ex) {
+      if (isEqual(NumberHandler::power(base, absLog), power))
+        logarithm = absLog;
+    } catch (...) {
+    }
+    if (isNAN(logarithm)) {
+      try {
+        if (isEqual(NumberHandler::power(base, -absLog), power))
+          logarithm = -absLog;
+      } catch (...) {
+      }
     }
   }
-  if (isNAN(Logarithm) || isinf(Logarithm))
+  if (isNAN(logarithm) || isinf(logarithm))
     throw runtime_error("Log error: log(" + toString(power) + ", " +
                         toString(base) + ")");
-  return Logarithm;
+  return logarithm;
 }
