@@ -119,8 +119,8 @@ BOOST_AUTO_TEST_CASE(test_case2) {
 BOOST_AUTO_TEST_CASE(test_case3) {
   BOOST_CHECK_CLOSE(power(32, 0.2), 2, TOLERANCE);
   BOOST_CHECK_CLOSE(power(32, -0.2), 0.5, TOLERANCE);
-  BOOST_CHECK_CLOSE(power(-32, 0.2), -2, TOLERANCE);
-  BOOST_CHECK_CLOSE(power(-32, -0.2), -0.5, TOLERANCE);
+  BOOST_CHECK_THROW(power(-32, 0.2), runtime_error);
+  BOOST_CHECK_THROW(power(-32, -0.2), runtime_error);
 }
 
 BOOST_AUTO_TEST_CASE(test_case4) {
@@ -184,6 +184,13 @@ BOOST_AUTO_TEST_CASE(test_case4) {
 }
 
 BOOST_AUTO_TEST_CASE(test_case5) {
+  BOOST_CHECK_THROW(log(-2, -32), runtime_error);
+  BOOST_CHECK_CLOSE(log(-32, -2), 5, TOLERANCE);
+  BOOST_CHECK_CLOSE(log(4, -2), 2, TOLERANCE);
+  BOOST_CHECK_THROW(log(-4, -2), runtime_error);
+}
+
+BOOST_AUTO_TEST_CASE(test_case6) {
   BOOST_CHECK_THROW(log(NAN, 1), runtime_error);
   BOOST_CHECK_THROW(log(1, NAN), runtime_error);
   BOOST_CHECK_THROW(log(NAN, NAN), runtime_error);
