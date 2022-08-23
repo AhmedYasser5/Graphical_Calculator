@@ -100,21 +100,10 @@ NumberHandler::divide(const NumberType &dividend,
   return result;
 }
 
-template <typename T> static T fastExponentiation(T base, size_t exponent) {
-  T power = 1;
-  while (exponent) {
-    if (exponent & 1)
-      power *= base;
-    base *= base;
-    exponent >>= 1;
-  }
-  return power;
-}
-
 NumberHandler::NumberType
 NumberHandler::integerPower(const NumberType &base,
                             const NumberType &exponent) const {
-  return fastExponentiation(base, exponent);
+  return pow(base, (size_t)exponent);
 }
 
 NumberHandler::NumberType
