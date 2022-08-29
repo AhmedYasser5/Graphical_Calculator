@@ -1,33 +1,44 @@
 #pragma once
 
 #include "Evaluator/Interface.hpp"
+#include <cstddef>
 #include <stack>
 
 namespace Calculator {
 
-class Evaluator : public EvaluatorInterface<double, std::string, std::string> {
-private:
+using std::size_t;
+using std::stack;
+using std::string;
+using std::unique_ptr;
+using std::unordered_map;
+using std::vector;
+
+class Evaluator : public EvaluatorInterface<double, string, string> {
+protected:
   using NumberType = double;
-  using VariableType = std::string;
-  using FunctionType = std::string;
+  using VariableType = string;
+  using FunctionType = string;
   using EquationElement =
       EquationElement<NumberType, VariableType, FunctionType>;
 
-  std::unique_ptr<NumberHandlerInterface<NumberType>> operationsHandler;
-  std::stack<NumberType> stackedNumbers;
+  unique_ptr<NumberHandlerInterface<NumberType>> operationsHandler;
+  stack<NumberType> stackedNumbers;
 
+  bool processOneInputFunctions(const FunctionType &func,
+                                const NumberType &number);
+  bool processTwoInputFunctions(const FunctionType &func,
+                                const NumberType &first,
+                                const NumberType &second);
   void processFunctions(const FunctionType &func);
-  void processVariables(
-      const VariableType &var,
-      const std::unordered_map<std::string, NumberType> &variables);
+  void processVariables(const VariableType &var,
+                        const unordered_map<string, NumberType> &variables);
 
 public:
-  Evaluator(
-      std::unique_ptr<NumberHandlerInterface<NumberType>> operationsHandler);
+  Evaluator(unique_ptr<NumberHandlerInterface<NumberType>> operationsHandler);
   virtual ~Evaluator() = default;
   virtual NumberType
-  evaluate(const std::vector<EquationElement> &equation,
-           const std::unordered_map<std::string, NumberType> &variables =
+  evaluate(const vector<EquationElement> &equation,
+           const unordered_map<string, NumberType> &variables =
                {}); // throws different exceptions
 };
 
