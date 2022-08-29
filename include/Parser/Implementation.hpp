@@ -7,38 +7,54 @@
 
 namespace Calculator {
 
-class Parser : public ParserInterface<double, std::string, std::string> {
-private:
+using std::size_t;
+using std::stack;
+using std::string;
+using std::unique_ptr;
+using std::unordered_map;
+using std::unordered_set;
+using std::vector;
+
+class Parser : public ParserInterface<double, string, string> {
+protected:
   using NumberType = double;
-  using VariableType = std::string;
-  using FunctionType = std::string;
+  using VariableType = string;
+  using FunctionType = string;
   using EquationElement =
       EquationElement<NumberType, VariableType, FunctionType>;
 
-  std::unique_ptr<NumberHandlerInterface<NumberType>> reader;
-  std::unordered_map<FunctionType, std::unordered_set<FunctionType>>
-      operatorDependecies;
-  std::unordered_set<FunctionType> functions;
-  std::vector<EquationElement> parsedEquation;
-  std::stack<FunctionType> stackedFunctions;
+  unique_ptr<NumberHandlerInterface<NumberType>> reader;
+  unordered_map<FunctionType, unordered_set<FunctionType>> operatorDependecies;
+  unordered_set<FunctionType> functions;
+  vector<EquationElement> parsedEquation;
+  stack<FunctionType> stackedFunctions;
+  size_t index;
+  bool shouldBeOperator;
 
-  template <typename Function>
-  void popStackedFunctionsUntil(Function stopCondition);
+  template <typename FUNCTION>
+  void popStackedFunctionsUntil(FUNCTION &&stopCondition);
+  template <typename FUNCTION>
+  string readUntil(const string &equation, FUNCTION &&stopCondition);
 
-  void readWhitespaces(const std::string &equation, std::size_t &index) const;
+  void readOperators(const string &equation);
+  void readSigns(const string &equation);
+  void readNumbers(const string &equation);
+  void readComma();
+  void readOpeningParanthesis();
+  void readClosingParanthesis();
 
-  void readOperators(const std::string &equation, std::size_t &index);
-  void readSigns(const std::string &equation, std::size_t &index);
-  void readNumbers(const std::string &equation, std::size_t &index);
-  std::string readLetters(const std::string &equation, std::size_t &index);
+  bool readFunctions(const string &func);
+  bool readVariables(const string &var, const unordered_set<string> &variables);
+  void readFunctionsAndVariables(const string &equation,
+                                 const unordered_set<string> &variables);
 
 public:
-  Parser(std::unique_ptr<NumberHandlerInterface<NumberType>> numberHandler);
+  Parser(unique_ptr<NumberHandlerInterface<NumberType>> numberHandler);
   virtual ~Parser() = default;
-  virtual void parse(const std::string &equation,
-                     const std::unordered_set<std::string> &variables =
-                         {}); // throws different exceptions
-  virtual const std::vector<EquationElement> &getParsedEquation() const;
+  virtual void parse(
+      const string &equation,
+      const unordered_set<string> &variables = {}); // throws std::runtime_error
+  virtual const vector<EquationElement> &getParsedEquation() const;
 };
 
 } // namespace Calculator
