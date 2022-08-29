@@ -4,6 +4,8 @@
 
 namespace Calculator {
 
+using std::string;
+
 class NumberHandler : public NumberHandlerInterface<double> {
 protected:
   using NumberType = double;
@@ -16,8 +18,8 @@ protected:
 public:
   virtual ~NumberHandler() = default;
   virtual NumberType
-  fromString(const std::string &str) const; // throws std::runtime_error
-  virtual std::string toString(const NumberType &num) const;
+  fromString(const string &str) const; // throws std::runtime_error
+  virtual string toString(const NumberType &num) const;
   virtual NumberType
   add(const NumberType &augend,
       const NumberType &addend) const; // throws std::runtime_error
