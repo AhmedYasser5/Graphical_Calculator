@@ -3,7 +3,7 @@
 namespace Calculator {
 
 template <typename N, typename V, typename F> class EquationElement {
-private:
+protected:
   union container {
     N num;
     V var;
@@ -17,7 +17,7 @@ private:
 public:
   enum STATE { NUMBER, VARIABLE, FUNCTION, NOTHING };
 
-private:
+protected:
   STATE state;
   void killAny();
   void copy(const EquationElement<N, V, F> &other);
