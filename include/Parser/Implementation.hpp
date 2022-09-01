@@ -58,3 +58,21 @@ public:
 };
 
 } // namespace Calculator
+
+template <typename FUNCTION>
+void Calculator::Parser::popStackedFunctionsUntil(FUNCTION &&stopCondition) {
+  while (!stackedFunctions.empty() && !stopCondition(stackedFunctions.top())) {
+    parsedEquation.emplace_back();
+    parsedEquation.back().updateFunction(stackedFunctions.top());
+    stackedFunctions.pop();
+  }
+}
+
+template <typename FUNCTION>
+Calculator::string Calculator::Parser::readUntil(const string &equation,
+                                                 FUNCTION &&stopCondition) {
+  string str;
+  while (index < equation.size() && !stopCondition(str, equation[index]))
+    str += equation[index++];
+  return str;
+}

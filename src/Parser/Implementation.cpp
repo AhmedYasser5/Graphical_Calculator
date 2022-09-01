@@ -68,23 +68,6 @@ void Parser::readNumbers(const string &equation) {
   shouldBeOperator = true;
 }
 
-template <typename FUNCTION>
-void Parser::popStackedFunctionsUntil(FUNCTION &&stopCondition) {
-  while (!stackedFunctions.empty() && !stopCondition(stackedFunctions.top())) {
-    parsedEquation.emplace_back();
-    parsedEquation.back().updateFunction(stackedFunctions.top());
-    stackedFunctions.pop();
-  }
-}
-
-template <typename FUNCTION>
-string Parser::readUntil(const string &equation, FUNCTION &&stopCondition) {
-  string str;
-  while (index < equation.size() && !stopCondition(str, equation[index]))
-    str += equation[index++];
-  return str;
-}
-
 void Parser::readComma() {
   index++;
   shouldBeOperator = false;
