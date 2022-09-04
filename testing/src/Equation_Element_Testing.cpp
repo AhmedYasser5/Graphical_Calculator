@@ -47,6 +47,26 @@ void chooseTriples(const TUPLE &types, FUNCTION &&testFunction) {
   });
 }
 
+BOOST_AUTO_TEST_CASE(Constructors_Tests) {
+  chooseTriples(
+      test_types, [&](auto &&N, auto &&V, auto &&F, auto element) -> void {
+        element.updateNumber(N);
+        decltype(element) anotherElement(element);
+        BOOST_CHECK_EQUAL(anotherElement.getState(), decltype(element)::NUMBER);
+        BOOST_CHECK_EQUAL(anotherElement.getNumber(), N);
+        element.updateFunction(F);
+        anotherElement = element;
+        BOOST_CHECK_EQUAL(anotherElement.getState(),
+                          decltype(element)::FUNCTION);
+        BOOST_CHECK_EQUAL(anotherElement.getFunction(), F);
+        element.updateVariable(V);
+        anotherElement = element;
+        BOOST_CHECK_EQUAL(anotherElement.getState(),
+                          decltype(element)::VARIABLE);
+        BOOST_CHECK_EQUAL(anotherElement.getVariable(), V);
+      });
+}
+
 BOOST_AUTO_TEST_CASE(Numbers_Tests) {
   chooseTriples(
       test_types, [&](auto &&N, auto &&V, auto &&F, auto element) -> void {
