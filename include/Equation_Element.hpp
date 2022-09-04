@@ -63,11 +63,11 @@ void Calculator::EquationElement<N, V, F>::copy(
     const EquationElement<N, V, F> &other) {
   state = other.state;
   if (state == NUMBER)
-    element.num = other.element.num;
+    new (&element.num) N(other.element.num);
   else if (state == FUNCTION)
-    element.func = other.element.func;
+    new (&element.func) F(other.element.func);
   else if (state == VARIABLE)
-    element.var = other.element.var;
+    new (&element.var) V(other.element.var);
 }
 
 template <typename N, typename V, typename F>
@@ -90,6 +90,7 @@ Calculator::EquationElement<N, V, F>::operator=(
     const EquationElement<N, V, F> &other) {
   killAny();
   copy(other);
+  return *this;
 }
 
 template <typename N, typename V, typename F>
