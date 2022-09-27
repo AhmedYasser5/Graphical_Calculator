@@ -31,6 +31,13 @@ protected:
   size_t index;
   bool shouldBeOperator;
 
+  void emplaceEquationElementNumber(vector<EquationElement> &vec,
+                                    const NumberType &num);
+  void emplaceEquationElementVariable(vector<EquationElement> &vec,
+                                      const VariableType &var);
+  void emplaceEquationElementFunction(vector<EquationElement> &vec,
+                                      const FunctionType &func);
+
   template <typename FUNCTION>
   void popStackedFunctionsUntil(FUNCTION &&stopCondition);
   template <typename FUNCTION>
@@ -50,11 +57,11 @@ protected:
 
 public:
   Parser(unique_ptr<NumberHandlerInterface<NumberType>> numberHandler);
-  virtual ~Parser() = default;
-  virtual void parse(
+  ~Parser() = default;
+  void parse(
       const string &equation,
       const unordered_set<string> &variables = {}); // throws std::runtime_error
-  virtual const vector<EquationElement> &getParsedEquation() const;
+  const vector<EquationElement> &getParsedEquation() const;
 };
 
 } // namespace Calculator
@@ -62,8 +69,7 @@ public:
 template <typename FUNCTION>
 void Calculator::Parser::popStackedFunctionsUntil(FUNCTION &&stopCondition) {
   while (!stackedFunctions.empty() && !stopCondition(stackedFunctions.top())) {
-    parsedEquation.emplace_back();
-    parsedEquation.back().updateFunction(stackedFunctions.top());
+    emplaceEquationElementFunction(parsedEquation, stackedFunctions.top());
     stackedFunctions.pop();
   }
 }

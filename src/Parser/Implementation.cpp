@@ -22,6 +22,24 @@ Parser::Parser(unique_ptr<NumberHandlerInterface<NumberType>> numberHandler)
   functions.insert("log");
 }
 
+void Parser::emplaceEquationElementNumber(vector<EquationElement> &vec,
+                                          const NumberType &num) {
+  vec.emplace_back();
+  vec.back().updateNumber(num);
+}
+
+void Parser::emplaceEquationElementVariable(vector<EquationElement> &vec,
+                                            const VariableType &var) {
+  vec.emplace_back();
+  vec.back().updateVariable(var);
+}
+
+void Parser::emplaceEquationElementFunction(vector<EquationElement> &vec,
+                                            const FunctionType &func) {
+  vec.emplace_back();
+  vec.back().updateFunction(func);
+}
+
 void Parser::readOperators(const string &equation) {
   popStackedFunctionsUntil([&](const FunctionType &func) -> bool {
     return functions.find(func) == functions.end();
@@ -51,8 +69,8 @@ void Parser::readSigns(const string &equation) {
       equation, [](const string &signs, const char &character) -> bool {
         return character != '+' && character != '-' && !isblank(character);
       });
-  bool isNegativeSignsOdd = std::count(signs.begin(), signs.end(), '-') & 1;
-  if (isNegativeSignsOdd)
+  bool areNegativeSignsOdd = std::count(signs.begin(), signs.end(), '-') & 1;
+  if (areNegativeSignsOdd)
     stackedFunctions.emplace("neg");
   if (index >= equation.size())
     throw runtime_error("An equation shouldn't end with an operator");
@@ -63,8 +81,7 @@ void Parser::readNumbers(const string &equation) {
       readUntil(equation, [](const string &num, const char &digit) -> bool {
         return !isdigit(digit) && digit != '.';
       });
-  parsedEquation.emplace_back();
-  parsedEquation.back().updateNumber(reader->fromString(num));
+  emplaceEquationElementNumber(parsedEquation, reader->fromString(num));
   shouldBeOperator = true;
 }
 
@@ -98,8 +115,7 @@ bool Parser::readVariables(const string &var,
                            const unordered_set<string> &variables) {
   if (variables.find(var) == variables.end())
     return false;
-  parsedEquation.emplace_back();
-  parsedEquation.back().updateVariable(var);
+  emplaceEquationElementVariable(parsedEquation, var);
   shouldBeOperator = true;
   return true;
 }

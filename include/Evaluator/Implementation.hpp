@@ -35,11 +35,10 @@ protected:
 
 public:
   Evaluator(unique_ptr<NumberHandlerInterface<NumberType>> operationsHandler);
-  virtual ~Evaluator() = default;
-  virtual NumberType
-  evaluate(const vector<EquationElement> &equation,
-           const unordered_map<string, NumberType> &variables =
-               {}); // throws different exceptions
+  ~Evaluator() = default;
+  NumberType evaluate(const vector<EquationElement> &equation,
+                      const unordered_map<string, NumberType> &variables =
+                          {}); // throws different exceptions
 };
 
 } // namespace Calculator

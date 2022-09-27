@@ -79,11 +79,11 @@ Evaluator::evaluate(const std::vector<EquationElement> &equation,
   while (!stackedNumbers.empty())
     stackedNumbers.pop();
   for (size_t i = 0; i < equation.size(); i++) {
-    if (equation[i].getState() == EquationElement::NUMBER)
+    if (equation[i].getState() == NUMBER)
       stackedNumbers.push(equation[i].getNumber());
-    else if (equation[i].getState() == EquationElement::FUNCTION)
+    else if (equation[i].getState() == FUNCTION)
       processFunctions(equation[i].getFunction());
-    else if (equation[i].getState() == EquationElement::VARIABLE)
+    else if (equation[i].getState() == VARIABLE)
       processVariables(equation[i].getVariable(), variables);
     else
       throw runtime_error("Unknown part of the equation");

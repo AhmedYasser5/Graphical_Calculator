@@ -2,6 +2,8 @@
 
 namespace Calculator {
 
+enum STATE { NUMBER, VARIABLE, FUNCTION, NOTHING };
+
 template <typename N, typename V, typename F> class EquationElement {
 protected:
   union container {
@@ -14,9 +16,6 @@ protected:
 
   container element;
 
-public:
-  enum STATE { NUMBER, VARIABLE, FUNCTION, NOTHING };
-
 protected:
   STATE state;
   void killAny();
@@ -24,6 +23,9 @@ protected:
 
 public:
   EquationElement();
+  static EquationElement<N, V, F> getEquationElementFromNumber(const N &num);
+  static EquationElement<N, V, F> getEquationElementFromVariable(const V &var);
+  static EquationElement<N, V, F> getEquationElementFromFunction(const F &func);
   ~EquationElement();
   EquationElement(const EquationElement<N, V, F> &other);
   const EquationElement<N, V, F> &
@@ -74,6 +76,33 @@ template <typename N, typename V, typename F>
 Calculator::EquationElement<N, V, F>::EquationElement() : state(NOTHING) {}
 
 template <typename N, typename V, typename F>
+Calculator::EquationElement<N, V, F>
+Calculator::EquationElement<N, V, F>::getEquationElementFromNumber(
+    const N &num) {
+  Calculator::EquationElement<N, V, F> element;
+  element.updateNumber(num);
+  return element;
+}
+
+template <typename N, typename V, typename F>
+Calculator::EquationElement<N, V, F>
+Calculator::EquationElement<N, V, F>::getEquationElementFromVariable(
+    const V &var) {
+  Calculator::EquationElement<N, V, F> element;
+  element.updateVariable(var);
+  return element;
+}
+
+template <typename N, typename V, typename F>
+Calculator::EquationElement<N, V, F>
+Calculator::EquationElement<N, V, F>::getEquationElementFromFunction(
+    const F &func) {
+  Calculator::EquationElement<N, V, F> element;
+  element.updateFunction(func);
+  return element;
+}
+
+template <typename N, typename V, typename F>
 Calculator::EquationElement<N, V, F>::~EquationElement() {
   killAny();
 }
@@ -94,7 +123,7 @@ Calculator::EquationElement<N, V, F>::operator=(
 }
 
 template <typename N, typename V, typename F>
-const typename Calculator::EquationElement<N, V, F>::STATE &
+const typename Calculator::STATE &
 Calculator::EquationElement<N, V, F>::getState() const {
   return state;
 }
