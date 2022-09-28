@@ -31,13 +31,6 @@ protected:
   size_t index;
   bool shouldBeOperator;
 
-  void emplaceEquationElementNumber(vector<EquationElement> &vec,
-                                    const NumberType &num);
-  void emplaceEquationElementVariable(vector<EquationElement> &vec,
-                                      const VariableType &var);
-  void emplaceEquationElementFunction(vector<EquationElement> &vec,
-                                      const FunctionType &func);
-
   template <typename FUNCTION>
   void popStackedFunctionsUntil(FUNCTION &&stopCondition);
   template <typename FUNCTION>
@@ -69,7 +62,7 @@ public:
 template <typename FUNCTION>
 void Calculator::Parser::popStackedFunctionsUntil(FUNCTION &&stopCondition) {
   while (!stackedFunctions.empty() && !stopCondition(stackedFunctions.top())) {
-    emplaceEquationElementFunction(parsedEquation, stackedFunctions.top());
+    parsedEquation.emplace_back(Calculator::FUNCTION, stackedFunctions.top());
     stackedFunctions.pop();
   }
 }
