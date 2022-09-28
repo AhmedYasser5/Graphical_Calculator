@@ -23,9 +23,7 @@ protected:
 
 public:
   EquationElement();
-  static EquationElement<N, V, F> getEquationElementFromNumber(const N &num);
-  static EquationElement<N, V, F> getEquationElementFromVariable(const V &var);
-  static EquationElement<N, V, F> getEquationElementFromFunction(const F &func);
+  template <typename T> EquationElement(STATE state, const T &Any);
   ~EquationElement();
   EquationElement(const EquationElement<N, V, F> &other);
   const EquationElement<N, V, F> &
@@ -76,30 +74,15 @@ template <typename N, typename V, typename F>
 Calculator::EquationElement<N, V, F>::EquationElement() : state(NOTHING) {}
 
 template <typename N, typename V, typename F>
-Calculator::EquationElement<N, V, F>
-Calculator::EquationElement<N, V, F>::getEquationElementFromNumber(
-    const N &num) {
-  Calculator::EquationElement<N, V, F> element;
-  element.updateNumber(num);
-  return element;
-}
-
-template <typename N, typename V, typename F>
-Calculator::EquationElement<N, V, F>
-Calculator::EquationElement<N, V, F>::getEquationElementFromVariable(
-    const V &var) {
-  Calculator::EquationElement<N, V, F> element;
-  element.updateVariable(var);
-  return element;
-}
-
-template <typename N, typename V, typename F>
-Calculator::EquationElement<N, V, F>
-Calculator::EquationElement<N, V, F>::getEquationElementFromFunction(
-    const F &func) {
-  Calculator::EquationElement<N, V, F> element;
-  element.updateFunction(func);
-  return element;
+template <typename T>
+Calculator::EquationElement<N, V, F>::EquationElement(STATE state, const T &Any)
+    : state(NOTHING) {
+  if (state == NUMBER)
+    updateNumber(*reinterpret_cast<const N *>(&Any));
+  else if (state == VARIABLE)
+    updateVariable(*reinterpret_cast<const V *>(&Any));
+  else if (state == FUNCTION)
+    updateFunction(*reinterpret_cast<const F *>(&Any));
 }
 
 template <typename N, typename V, typename F>
